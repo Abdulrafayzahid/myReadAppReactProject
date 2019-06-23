@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import logo from './logo.svg';
 import "./App.css";
 import { BrowserRouter, Route } from "react-router-dom";
 import * as BookApi from "./BookApi";
@@ -8,29 +7,30 @@ import BooksPage from "./BooksPage";
 
 class App extends Component {
   state = {
-    books : []
+    books : [] ,
+    read : [] ,
+    wantToRead : [],
+    currentlyReading : []
   };
   componentDidMount() {
-    BookApi.getAll().then(book => {
-      this.setState({
-        books: book
-      });
-    });
-  }
-  componentWillUnmount() {
-  BookApi.getAll()
+    BookApi.getAll().then(books => {
+      this.setState({books : books})
+      this.setState({read : books.filter(read => read.shelf === "read")})
+      this.setState({wantToRead : books.filter(read => read.shelf === "wantToRead")})
+      this.setState({currentlyReading : books.filter(read => read.shelf === "currentlyReading")})
+    }
+    )
   }
   render() {
-//   console.log(
-//    BookApi.getAll()
-//   );
 
-
+    console.log(BookApi.getAll());
+    
     const updateShelf = (books, shelf) => {
       BookApi.update(books, shelf)
-
       BookApi.getAll().then(books => {
-        this.setState({books : books})
+        this.setState({read : books.filter(read => read.shelf === "read")})
+        this.setState({wantToRead : books.filter(read => read.shelf === "wantToRead")})
+        this.setState({currentlyReading : books.filter(read => read.shelf === "currentlyReading")})        
       })
     }
    
@@ -42,8 +42,11 @@ class App extends Component {
             exact
             render={() => (
               <BooksPage
-                books={this.state.books}
+              read={this.state.read}
+                wantToRead={this.state.wantToRead}
+                currentlyReading={this.state.currentlyReading}
                 updateShelf={updateShelf}
+                
               />
             )}
           />
