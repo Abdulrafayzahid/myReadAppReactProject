@@ -7,30 +7,61 @@ import BooksPage from "./BooksPage";
 
 class App extends Component {
   state = {
-    books : [] ,
-    read : [] ,
+    books : [],
+    currentlyReading : [],
     wantToRead : [],
-    currentlyReading : []
+    read : []
   };
   componentDidMount() {
-    BookApi.getAll().then(books => {
-      this.setState({books : books})
-      this.setState({read : books.filter(read => read.shelf === "read")})
-      this.setState({wantToRead : books.filter(read => read.shelf === "wantToRead")})
-      this.setState({currentlyReading : books.filter(read => read.shelf === "currentlyReading")})
-    }
-    )
+    BookApi.getAll().then(book => book.map(books => {switch(books.shelf){
+        case "read":
+         return this.setState(prevState => ({
+            read: [...prevState.read, books]
+          }))
+          
+        case "currentlyReading":
+            return this.setState(prevState => ({
+            currentlyReading : [...prevState.currentlyReading , books]
+          }))  
+          
+          case "wantToRead":
+          return  this.setState(prevState => ({
+              wantToRead:[...prevState.wantToRead, books]
+            }))
+      }
+    })
+    );
   }
+
+
   render() {
 
-    console.log(BookApi.getAll());
-    
     const updateShelf = (books, shelf) => {
       BookApi.update(books, shelf)
-      BookApi.getAll().then(books => {
-        this.setState({read : books.filter(read => read.shelf === "read")})
-        this.setState({wantToRead : books.filter(read => read.shelf === "wantToRead")})
-        this.setState({currentlyReading : books.filter(read => read.shelf === "currentlyReading")})        
+
+      BookApi.getAll().then(book => {
+        this.setState({
+        books : book
+        })
+        this.state.books.filter (books => 
+          
+          {switch(books.shelf){
+          case "read":
+              return this.setState(prevState => ({
+              read: [...prevState.read, books]
+            }))
+            
+          case "currentlyReading":
+              return this.setState(prevState => ({
+              currentlyReading : [...prevState.currentlyReading , books]
+            }))  
+            
+            case "wantToRead":
+              return this.setState(prevState => ({
+                wantToRead:[...prevState.wantToRead, books]
+              }))
+        }
+      })
       })
     }
    
@@ -42,11 +73,10 @@ class App extends Component {
             exact
             render={() => (
               <BooksPage
-              read={this.state.read}
+                updateShelf={updateShelf}
                 wantToRead={this.state.wantToRead}
                 currentlyReading={this.state.currentlyReading}
-                updateShelf={updateShelf}
-                
+                read={this.state.read}
               />
             )}
           />
