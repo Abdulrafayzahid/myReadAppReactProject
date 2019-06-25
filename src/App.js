@@ -12,58 +12,81 @@ class App extends Component {
     wantToRead : [],
     read : []
   };
-  componentDidMount() {
-    BookApi.getAll().then(book => book.map(books => {switch(books.shelf){
-        case "read":
-         return this.setState(prevState => ({
-            read: [...prevState.read, books]
-          }))
-          
-        case "currentlyReading":
-            return this.setState(prevState => ({
-            currentlyReading : [...prevState.currentlyReading , books]
-          }))  
-          
-          case "wantToRead":
-          return  this.setState(prevState => ({
-              wantToRead:[...prevState.wantToRead, books]
-            }))
-      }
-    })
-    );
+  componentDidMount() { 
+    BookApi.getAll()
+      .then((books) => {
+        let wantToRead = [],
+          read = [],
+          currentlyReading = []
+
+        books.map((book) => {
+          const { shelf } = book
+          switch (shelf) {
+            case 'currentlyReading':
+              currentlyReading.push(book)
+              return null
+            case 'wantToRead':
+              wantToRead.push(book)
+              return null
+            case 'read':
+              read.push(book)
+              return null
+            default:
+              return null
+          }
+        })
+
+        this.setState({
+          currentlyReading,
+          wantToRead,
+          read,
+        })
+      })
+      .catch((err) => {
+        console.log("Error fetching data", err)
+      })
   }
+  
 
 
   render() {
 
     const updateShelf = (books, shelf) => {
       BookApi.update(books, shelf)
+      BookApi.getAll()
+      .then((books) => {
+        let wantToRead = [],
+          read = [],
+          currentlyReading = []
 
-      BookApi.getAll().then(book => {
-        this.setState({
-        books : book
+        books.map((book) => {
+          const { shelf } = book
+          switch (shelf) {
+            case 'currentlyReading':
+              currentlyReading.push(book)
+              return null
+            case 'wantToRead':
+              wantToRead.push(book)
+              return null
+            case 'read':
+              read.push(book)
+              return null
+            default:
+              return null
+          }
         })
-        this.state.books.filter (books => 
-          
-          {switch(books.shelf){
-          case "read":
-              return this.setState(prevState => ({
-              read: [...prevState.read, books]
-            }))
-            
-          case "currentlyReading":
-              return this.setState(prevState => ({
-              currentlyReading : [...prevState.currentlyReading , books]
-            }))  
-            
-            case "wantToRead":
-              return this.setState(prevState => ({
-                wantToRead:[...prevState.wantToRead, books]
-              }))
-        }
+        
+        this.setState({
+          currentlyReading,
+          wantToRead,
+          read
+        })
       })
+      .catch((err) => {
+        console.log("Error fetching data", err)
       })
     }
+    
    
     return (
       <div className="app">
